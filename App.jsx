@@ -8,7 +8,6 @@ import treeNodeFactory from "./model/treeNodeFactory"
 const App = React.createClass({
   getInitialState: function () {
     return {
-      apiKey: false,
       Trello: Trello,
       nodes: Array(),
       rootNode: null,
@@ -27,9 +26,8 @@ const App = React.createClass({
       e.stopPropagation();
     });
   },
-  setApiKey: function (apiKey) {
+  handleAuthentication: function () {
     this.setState({
-      apiKey: apiKey,
       currentView : 2
     });
   },
@@ -52,23 +50,24 @@ const App = React.createClass({
       currentView: 4
     })
   },
+  getCurrentView: function (viewNumber) {
+    switch (this.state.currentView) {
+      case 1:
+        return (<ApiKey Trello={this.state.Trello} onAuthentication={this.handleAuthentication}/>);
+      case 2:
+        return (<ColumnSelection Trello={this.state.Trello} handleCards={this.handleCards} />);
+      case 3:
+        return (<Choices ref="choices" setSortedRootNode={this.setSortedRootNode} nodes={this.state.nodes} rootNode={this.state.rootNode} />);
+      case 4:
+        return (<Results rootNode={this.state.rootNode} Trello={this.state.Trello}/>);
+      default:
+        return (<h3>Error</h3>);
+    }
+  },
   render: function () {
-    if (2 == this.state.currentView) {
-      document.getElementById("api_key_div").style.marginTop = -1 * document.getElementById("api_key_div").offsetHeight
-    }
-    if (3 == this.state.currentView) {
-      document.getElementById("card_url_div").style.marginTop = -1 * document.getElementById("card_url_div").offsetHeight
-    }
-    if (4 == this.state.currentView) {
-      document.getElementById("card_url_div").style.marginTop = -2 * document.getElementById("card_url_div").offsetHeight
-    }
-
     return (
         <div id="container_div">
-          <ApiKey apikey={this.state.apiKey} Trello={this.state.Trello} setApiKey={this.setApiKey} />
-          <ColumnSelection apikey={this.state.apiKey} Trello={this.state.Trello} handleCards={this.handleCards}/>
-          <Choices ref="choices" setSortedRootNode={this.setSortedRootNode} nodes={this.state.nodes} rootNode={this.state.rootNode} />
-          <Results rootNode={this.state.rootNode} Trello={this.state.Trello}/>
+          {this.getCurrentView()}
         </div>
     )
   },

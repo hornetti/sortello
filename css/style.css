@@ -1,3 +1,6 @@
+html, body, #container, #container_div {
+    height: 100%;
+}
 
 .choice_button {
     cursor: pointer;
@@ -15,6 +18,20 @@
     top: 0;
     right: 0;
     border: 0;
+}
+
+.footer{
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    padding: 5px;
+}
+
+.footer a{
+    color: black;
+}
+.footer a:hover{
+    color: grey;
 }
 
 .btn {
@@ -143,7 +160,6 @@ h2 {
 }
 
 #second_div {
-    height: 100%;
     padding: 75px 150px 100px;
     background: white;
     color: #0000a3;
@@ -234,7 +250,7 @@ a:hover {
     margin: 10px 0 50px;
     font-family: "montserrat", sans-serif;
     font-size: 1em;
-    color: white;
+    color: #bbb;
 }
 
 button.continue-to-choices--button {
@@ -282,3 +298,4 @@ button.continue-to-choices--button {
 .centered_content > .almost-done--position {
     padding-top: 200px !important;
 }
+

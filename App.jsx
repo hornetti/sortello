@@ -8,7 +8,6 @@ import treeNodeFactory from "./model/treeNodeFactory"
 const App = React.createClass({
   getInitialState: function () {
     return {
-      apiKey: false,
       Trello: Trello,
       nodes: Array(),
       rootNode: null,
@@ -16,21 +15,29 @@ const App = React.createClass({
     };
   },
   componentDidMount: function () {
-    jQuery(".centered_content").each(function () {
-      var content_height = jQuery(this).outerHeight();
-      var viewport_height = jQuery(document).innerHeight();
-      var padding_top = (viewport_height / 2) - content_height;
-      jQuery(this).css('padding-top', padding_top + 'px');
-    });
-
     jQuery('.choice_button .card_link').click(function (e) {
       e.stopPropagation();
     });
   },
-  setApiKey: function (apiKey) {
+  centerContent: function () {
+    function centerTheContent () {
+      jQuery(".centered_content").each(function () {
+        var content_height = jQuery(this).height();
+        var viewport_height = jQuery(document).innerHeight();
+        var padding_top = (viewport_height / 2) - (content_height / 2);
+        jQuery(this).css('padding-top', padding_top + 'px');
+      });
+    }
+
+    centerTheContent();
+
+    jQuery(window).resize(function () {
+      centerTheContent();
+    });
+  },
+  handleAuthentication: function () {
     this.setState({
-      apiKey: apiKey,
-      currentView : 2
+      currentView: 2
     });
   },
   handleCards: function (listCards) {
@@ -52,23 +59,28 @@ const App = React.createClass({
       currentView: 4
     })
   },
+  getCurrentView: function (viewNumber) {
+    switch (this.state.currentView) {
+      case 1:
+        return (<ApiKey Trello={this.state.Trello} onAuthentication={this.handleAuthentication}
+                        centerContent={this.centerContent}/>);
+      case 2:
+        return (<ColumnSelection Trello={this.state.Trello} handleCards={this.handleCards}
+                                 centerContent={this.centerContent}/>);
+      case 3:
+        return (<Choices ref="choices" setSortedRootNode={this.setSortedRootNode} nodes={this.state.nodes}
+                         rootNode={this.state.rootNode} centerContent={this.centerContent}/>);
+      case 4:
+        return (
+            <Results rootNode={this.state.rootNode} Trello={this.state.Trello} centerContent={this.centerContent}/>);
+      default:
+        return (<h3>Error</h3>);
+    }
+  },
   render: function () {
-    if (2 == this.state.currentView) {
-      document.getElementById("api_key_div").style.marginTop = -1 * document.getElementById("api_key_div").offsetHeight
-    }
-    if (3 == this.state.currentView) {
-      document.getElementById("card_url_div").style.marginTop = -1 * document.getElementById("card_url_div").offsetHeight
-    }
-    if (4 == this.state.currentView) {
-      document.getElementById("card_url_div").style.marginTop = -2 * document.getElementById("card_url_div").offsetHeight
-    }
-
     return (
         <div id="container_div">
-          <ApiKey apikey={this.state.apiKey} Trello={this.state.Trello} setApiKey={this.setApiKey} />
-          <ColumnSelection apikey={this.state.apiKey} Trello={this.state.Trello} handleCards={this.handleCards}/>
-          <Choices ref="choices" setSortedRootNode={this.setSortedRootNode} nodes={this.state.nodes} rootNode={this.state.rootNode} />
-          <Results rootNode={this.state.rootNode} Trello={this.state.Trello}/>
+          {this.getCurrentView()}
         </div>
     )
   },

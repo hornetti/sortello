@@ -1,12 +1,24 @@
 var exec = require('child_process').exec;
 
+var arguments = process.argv.slice(2);
+
+if (arguments.length < 2) {
+  console.log("Usage: node deploy.js <version> <message>");
+  return 1;
+}
+
 var version = process.argv.slice(2)[0];
 var message = process.argv.slice(2)[1];
 
-console.log(version);
-console.log(message);
+console.log("Release " + version + ":" + message);
 
-var cmd = 'git checkout master && git pull && git tag -a ' + version + ' -m "' + message + '" && git push --tags && npm run build && git checkout gh-pages && git merge master && npm test && git push origin gh-pages && git checkout master';
+var getMasterUpdated = 'git checkout master && git pull && ';
+var compileJsForProduction = 'npm run build && git commit -am "update js production build" && git push && ';
+var tagNewRelease = 'git tag -a ' + version + ' -m "' + message + '" && git push --tags && ';
+var pushToGithubPages = 'git checkout gh-pages && git merge master && npm test && git push origin gh-pages && ';
+var backToMasterBranch = 'git checkout master';
+
+var cmd = getMasterUpdated +  compileJsForProduction + tagNewRelease + pushToGithubPages + backToMasterBranch;
 
 console.log("Command: " + cmd);
 

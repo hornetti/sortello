@@ -3,6 +3,7 @@ import {find} from "lodash"
 import Header from './Header.jsx';
 import BoardSelector from './BoardSelector.jsx'
 import ListSelector from './ListSelector.jsx'
+import queryString from "query-string";
 
 const ColumnSelection = React.createClass({
   getInitialState: function () {
@@ -17,15 +18,42 @@ const ColumnSelection = React.createClass({
     this.props.centerContent();
   },
   componentDidMount: function () {
+    var Trello = this.props.Trello;
+
+    var that = this;
+    const params = queryString.parse(location.search);
+    if (params.boardId !== undefined && params.listName !== undefined) {
+      var boardId = params.boardId;
+      var listName = params.listName;
+      Trello.boards.get(boardId, {
+        organizations: "all",
+        organization_fields: "all",
+        lists: "open",
+        list_fields: "all"
+      }, function (board) {
+        for (var i = 0; i < board.lists.length; i++) {
+          var list = board.lists[i];
+          if (list.name === listName) {
+            that.retrieveCardsByList(list)
+          }
+        }
+      }, function (e) {
+        console.log(e);
+      });
+    }
+
     this.props.centerContent();
-    if(this.state.organizations.length > 0){
+    if (this.state.organizations.length > 0) {
       return;
     }
 
-    var Trello = this.props.Trello;
-    var that = this;
 
-    Trello.members.get('me', { organizations: "all", organization_fields : "all", boards: "open", board_lists: "open"}, function (data) {
+    Trello.members.get('me', {
+      organizations: "all",
+      organization_fields: "all",
+      boards: "open",
+      board_lists: "open"
+    }, function (data) {
       var boardGroups = [];
       var boards = data.boards;
       var organizations = data.organizations;
@@ -77,19 +105,20 @@ const ColumnSelection = React.createClass({
   render: function () {
     return (
         <div id="card_url_div">
-            <div className="centered_content">
-                <div className="select-list--text-container">
-                    <p>Select the board you want to prioritize</p>
-                </div>
-                <p>
-                  <BoardSelector groupedboards={this.state.groupedboards} onChange={this.handleBoardClicked}></BoardSelector>
-                </p>
-                {
-                    this.state.lists.length === 0 ?
-                    "" :
-                    <p><ListSelector lists={this.state.lists} onChange={this.handleListClicked} ></ListSelector></p>
-                }
+          <div className="centered_content">
+            <div className="select-list--text-container">
+              <p>Select the board you want to prioritize</p>
             </div>
+            <p>
+              <BoardSelector groupedboards={this.state.groupedboards}
+                             onChange={this.handleBoardClicked}></BoardSelector>
+            </p>
+            {
+              this.state.lists.length === 0 ?
+                  "" :
+                  <p><ListSelector lists={this.state.lists} onChange={this.handleListClicked}></ListSelector></p>
+            }
+          </div>
         </div>
     )
   }
